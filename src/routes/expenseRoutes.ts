@@ -1,14 +1,17 @@
 
 import { Router } from 'express';
-import { createExpense,
+import {
+  createExpense,
   getExpenses,
   getExpenseById,
   updateExpense,
   deleteExpense,
- } from '../controllers/expenseController';
+} from '../controllers/expenseController';
+import { helloWord } from '../controllers/helloController';
 
 const router = Router();
 
+router.get('/hello-word', helloWord);
 router.post('/gastos', createExpense);
 router.get('/gastos', getExpenses);
 router.get('/gastos/:id', getExpenseById);

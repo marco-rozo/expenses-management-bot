@@ -1,7 +1,6 @@
 
 import { Category } from '../models/expenseModel';
 
-// Um mapa para sinônimos ou variações comuns. As chaves são as entradas do usuário (em minúsculas), os valores são a categoria oficial do enum.
 const categoryMap: { [key: string]: Category } = {
   'alimentação': Category.ALIMENTACAO,
   'comida': Category.ALIMENTACAO,
@@ -44,19 +43,12 @@ const categoryMap: { [key: string]: Category } = {
   'outros': Category.OUTROS,
 };
 
-/**
- * Normaliza a entrada de categoria do usuário para um valor do enum Category.
- * @param userInput A string de categoria fornecida pelo usuário.
- * @returns O valor correspondente do enum Category ou undefined se não houver correspondência.
- */
 export const normalizeCategory = (userInput: string): Category | undefined => {
     if (!userInput) {
         return undefined;
     }
     const lowercasedInput = userInput.toLowerCase();
 
-    // Verifica se a entrada corresponde a um dos valores literais do enum (ex: 'Moradia')
-    // ou a uma das chaves do enum (ex: 'MORADIA')
     const enumValues = Object.values(Category).map(v => v.toLowerCase());
     const enumKeys = Object.keys(Category).map(k => k.toLowerCase());
 
