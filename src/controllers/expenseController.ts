@@ -1,25 +1,25 @@
 
 import { Request, Response } from 'express';
 import * as expenseService from '../services/expenseService';
-import { Expense, Category } from '../models/expenseModel';
-import { normalizeCategory } from '../utils/categoryNormalizer';
+import { generateExpenseMessage, GeminiAction } from '../services/geminiService';
+import { Expense } from '../models/expenseModel';
 
 export const createExpense = async (req: Request, res: Response) => {
   try {
     const expenseData: Omit<Expense, '_id' | 'createdAt' | 'updatedAt'> = req.body;
-
-    const normalizedCategory = normalizeCategory(expenseData.categoria as any); // Usamos 'as any' para tratar a entrada inicial como string
-    if (!normalizedCategory) {
-      return res.status(400).json({ 
-        message: 'Categoria inválida.',
-        validCategories: Object.values(Category) 
-      });
-    }
-    expenseData.categoria = normalizedCategory;
-
+    
+    // Cria a despesa
     const newExpenseId = await expenseService.createExpense(expenseData);
-    res.status(201).json({ id: newExpenseId });
+
+    // Gera a mensagem personalizada
+    const geminiMessage = await generateExpenseMessage(GeminiAction.CRIADO, { 
+        ...expenseData, 
+        _id: newExpenseId 
+    });
+
+    res.status(201).json({ message: geminiMessage });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Erro ao criar despesa' });
   }
 };
@@ -50,31 +50,35 @@ export const getExpenseById = async (req: Request, res: Response) => {
 export const updateExpense = async (req: Request, res: Response) => {
   try {
     const expenseData: Partial<Expense> = req.body;
-
-    // Se a categoria está sendo atualizada, normaliza e valida
-    if (expenseData.categoria) {
-      const normalizedCategory = normalizeCategory(expenseData.categoria as any);
-      if (!normalizedCategory) {
-        return res.status(400).json({ 
-          message: 'Categoria inválida.',
-          validCategories: Object.values(Category)
-        });
-      }
-      expenseData.categoria = normalizedCategory;
-    }
-    
     await expenseService.updateExpense(req.params.id, expenseData);
-    res.status(200).json({ message: 'Despesa atualizada com sucesso' });
+
+    // Pega os dados atualizados para gerar a mensagem
+    const updatedExpense = await expenseService.getExpenseById(req.params.id);
+
+    const geminiMessage = await generateExpenseMessage(GeminiAction.ATUALIZADO, updatedExpense!);
+    
+    res.status(200).json({ message: geminiMessage });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Erro ao atualizar despesa' });
   }
 };
 
 export const deleteExpense = async (req: Request, res: Response) => {
   try {
+    // Pega os dados da despesa ANTES de deletar
+    const expenseToDelete = await expenseService.getExpenseById(req.params.id);
+    if (!expenseToDelete) {
+        return res.status(404).json({ message: 'Despesa não encontrada para deletar' });
+    }
+
     await expenseService.deleteExpense(req.params.id);
-    res.status(200).json({ message: 'Despesa deletada com sucesso' });
+
+    const geminiMessage = await generateExpenseMessage(GeminiAction.DELETADO, expenseToDelete);
+
+    res.status(200).json({ message: geminiMessage });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ message: 'Erro ao deletar despesa' });
   }
 };
