@@ -1,19 +1,54 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import { Client } from 'whatsapp-web.js';
+import * as qrcode from 'qrcode-terminal';
+import { isAudioFile } from './utils/isAudioFile';
+import TranscribeAudioUsecase from './usecases/transcribeAudioUsecase';
 
-import express from 'express';
-import bodyParser from 'body-parser';
-import cors from 'cors';
-import expenseRoutes from './routes/expenseRoutes';
+console.log('Iniciando o cliente do WhatsApp...');
 
-const app = express();
-
-app.use(cors());
-app.use(bodyParser.json());
-app.use(expenseRoutes);
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+const client = new Client({
 });
+
+client.on('qr', (qr) => {
+  console.log('QR Code recebido, escaneie com o seu celular.');
+  qrcode.generate(qr, { small: true });
+});
+
+client.on('ready', () => {
+  console.log('Cliente do WhatsApp está pronto!');
+});
+
+client.on('message', async (message) => {
+  try {
+    console.log(`Mensagem recebida de: ${message.from}`);
+    if (message.hasMedia) {
+      const media = await message.downloadMedia();
+
+      if (isAudioFile(media.mimetype)) {
+        console.log('Mensagem contém um arquivo de áudio.');
+        const audioBase64 = media.data;
+        //TODO injetar a dependência
+        const transcribeUsecase = new TranscribeAudioUsecase();
+
+        transcribeUsecase.execute(audioBase64)
+          .then(transcribedText => {
+            console.log('Texto Transcrito:', transcribedText);
+          })
+          .catch(error => {
+            console.error('Erro ao transcrever áudio:', error);
+          });
+
+      }
+    } else {
+      console.log(`Conteúdo: ${message.body}`);
+    }
+  } catch (error) {
+    console.error('Erro ao processar a mensagem:', error);
+  }
+
+});
+
+client.on('auth_failure', (msg) => {
+  console.error('Falha na autenticação!', msg);
+});
+
+client.initialize().catch(console.error);
