@@ -1,7 +1,7 @@
 
 import { Request, Response } from 'express';
 import * as expenseService from '../services/expenseService';
-import { generateExpenseMessage, GeminiAction } from '../services/geminiService';
+import { generateExpenseMessage } from '../services/geminiService';
 import { Category, Expense } from '../models/expenseModel';
 import { normalizeCategory } from '../utils/categoryNormalizer';
 
@@ -20,7 +20,7 @@ export const createExpense = async (req: Request, res: Response) => {
     expenseData.categoria = normalizedCategory;
     const newExpenseId = await expenseService.createExpense(expenseData);
 
-    const geminiMessage = await generateExpenseMessage(GeminiAction.CRIADO, {
+    const geminiMessage = await generateExpenseMessage(GeminiAction.create, {
       ...expenseData,
       _id: newExpenseId
     });
@@ -62,7 +62,7 @@ export const updateExpense = async (req: Request, res: Response) => {
 
     const updatedExpense = await expenseService.getExpenseById(req.params.id);
 
-    const geminiMessage = await generateExpenseMessage(GeminiAction.ATUALIZADO, updatedExpense!);
+    const geminiMessage = await generateExpenseMessage(GeminiAction.update, updatedExpense!);
 
     res.status(200).json({ message: geminiMessage });
   } catch (error) {
@@ -80,7 +80,7 @@ export const deleteExpense = async (req: Request, res: Response) => {
 
     await expenseService.deleteExpense(req.params.id);
 
-    const geminiMessage = await generateExpenseMessage(GeminiAction.DELETADO, expenseToDelete);
+    const geminiMessage = await generateExpenseMessage(GeminiAction.delete, expenseToDelete);
 
     res.status(200).json({ message: geminiMessage });
   } catch (error) {

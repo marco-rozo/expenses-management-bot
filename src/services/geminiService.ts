@@ -4,12 +4,6 @@ import { Expense } from '../models/expenseModel';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY as string);
 
-export enum GeminiAction {
-  CRIADO = 'CRIADO',
-  ATUALIZADO = 'ATUALIZADO',
-  DELETADO = 'DELETADO',
-}
-
 export async function generateExpenseMessage(action: GeminiAction, expense: Partial<Expense>): Promise<string> {
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
