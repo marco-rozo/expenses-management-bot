@@ -1,5 +1,5 @@
-enum GeminiAction {
-  create = "create",
-  update = "update",
-  delete = "delete"
+export enum GeminiAction {
+  CREATE = "CREATE",
+  UPDATE = "UPDATE",
+  DELETE = "DELETE"
 }

@@ -32,6 +32,9 @@ client.on('message', async (message) => {
         transcribeUsecase.execute(audioBase64)
           .then(transcribedText => {
             console.log('Texto Transcrito:', transcribedText);
+            if (transcribedText) {
+              message.reply(`Texto transcrito: ${transcribedText}`);
+            }
           })
           .catch(error => {
             console.error('Erro ao transcrever áudio:', error);

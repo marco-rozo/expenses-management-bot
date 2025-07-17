@@ -1,14 +1,14 @@
 
 import { Request, Response } from 'express';
 import * as expenseService from '../services/expenseService';
-import { generateExpenseMessage } from '../services/geminiService';
 import { Category, Expense } from '../models/expenseModel';
 import { normalizeCategory } from '../utils/categoryNormalizer';
+import { GeminiAction } from '../enums/GeminiAction';
+import GeminiService from '../services/geminiService';
+import GenerateFriendlyMessageUseCase from '../usecases/generateFriendlyMessageUseCase';
 
 export const createExpense = async (req: Request, res: Response) => {
   try {
-
-
     const expenseData: Omit<Expense, '_id' | 'createdAt' | 'updatedAt'> = req.body;
     const normalizedCategory = normalizeCategory(expenseData.categoria as any); // Usamos 'as any' para tratar a entrada inicial como string
     if (!normalizedCategory) {
@@ -18,12 +18,13 @@ export const createExpense = async (req: Request, res: Response) => {
       });
     }
     expenseData.categoria = normalizedCategory;
-    const newExpenseId = await expenseService.createExpense(expenseData);
+    await expenseService.createExpense(expenseData);
 
-    const geminiMessage = await generateExpenseMessage(GeminiAction.create, {
-      ...expenseData,
-      _id: newExpenseId
-    });
+    //TODO injetar a dependência
+    const geminiService = new GeminiService();
+    const generateFriendlyMessageUseCase = new GenerateFriendlyMessageUseCase(geminiService);
+
+    const geminiMessage = await generateFriendlyMessageUseCase.execute(GeminiAction.CREATE, expenseData);
 
     res.status(201).json({ message: geminiMessage });
   } catch (error) {
@@ -61,8 +62,12 @@ export const updateExpense = async (req: Request, res: Response) => {
     await expenseService.updateExpense(req.params.id, expenseData);
 
     const updatedExpense = await expenseService.getExpenseById(req.params.id);
+    
+    //TODO injetar a dependência
+    const geminiService = new GeminiService();
+    const generateFriendlyMessageUseCase = new GenerateFriendlyMessageUseCase(geminiService);
 
-    const geminiMessage = await generateExpenseMessage(GeminiAction.update, updatedExpense!);
+    const geminiMessage = await generateFriendlyMessageUseCase.execute(GeminiAction.UPDATE, updatedExpense);
 
     res.status(200).json({ message: geminiMessage });
   } catch (error) {
@@ -79,8 +84,12 @@ export const deleteExpense = async (req: Request, res: Response) => {
     }
 
     await expenseService.deleteExpense(req.params.id);
+    
+    //TODO injetar a dependência
+    const geminiService = new GeminiService();
+    const generateFriendlyMessageUseCase = new GenerateFriendlyMessageUseCase(geminiService);
 
-    const geminiMessage = await generateExpenseMessage(GeminiAction.delete, expenseToDelete);
+    const geminiMessage = await generateFriendlyMessageUseCase.execute(GeminiAction.DELETE, expenseToDelete);
 
     res.status(200).json({ message: geminiMessage });
   } catch (error) {
