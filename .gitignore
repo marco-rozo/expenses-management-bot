@@ -12,3 +12,4 @@
 !.vscode/settings.json
 
 .env
+expense-management-*.json
