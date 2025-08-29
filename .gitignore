@@ -1,0 +1,15 @@
+# Dependências
+/node_modules
+
+# Build
+/dist
+
+# Arquivos do sistema operacional
+.DS_Store
+
+# Arquivos de editor
+.vscode/
+!.vscode/settings.json
+
+.env
+expense-management-*.json
