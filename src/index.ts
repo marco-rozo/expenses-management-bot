@@ -1,4 +1,4 @@
-import { Client } from 'whatsapp-web.js';
+import { Client, LocalAuth } from 'whatsapp-web.js';
 import * as qrcode from 'qrcode-terminal';
 import GeminiService from './services/geminiService';
 import TranscribeAudioUsecase from './usecases/transcribeAudioUsecase';
@@ -9,7 +9,10 @@ import ExpenseDatasource from './datasources/expenseDatasource';
 import ExpenseService from './services/expenseService';
 
 
-const client = new Client({});
+const client = new Client({
+  authStrategy: new LocalAuth(),
+  puppeteer: { headless: true, args: ['--no-sandbox'] },
+});
 const geminiService = new GeminiService();
 const transcribeUsecase = new TranscribeAudioUsecase();
 const expenseDatasourse = new ExpenseDatasource();

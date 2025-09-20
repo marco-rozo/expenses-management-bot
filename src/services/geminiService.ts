@@ -6,7 +6,7 @@ class GeminiService {
   private genAI: GoogleGenAI;
 
   constructor() {
-    this.genAI = new GoogleGenAI({apiKey: process.env.GOOGLE_API_KEY});
+    this.genAI = new GoogleGenAI({apiKey: process.env.GEMINI_API_KEY});
   }
 
   async generateContent(prompt: string, isJson:boolean = true): Promise<string> {
