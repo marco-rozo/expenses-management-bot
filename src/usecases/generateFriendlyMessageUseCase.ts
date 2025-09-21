@@ -6,28 +6,56 @@ class GenerateFriendlyMessageUseCase {
   constructor(private readonly geminiService: GeminiService) {}
 
   async execute(action: GeminiActions, expense: Partial<Expense>): Promise<string> {
-    const { valor, categoria } = expense;
+    const { valor, categoria, originalMessage } = expense;
+    const currentDate = new Date().toLocaleDateString('pt-BR');
 
     const prompt = `
-      Gere uma mensagem curta e amigável para o usuário sobre uma transação de despesa.
-      A mensagem deve ser criativa e refletir o contexto da ação realizada.
+      Sua tarefa é gerar uma mensagem de confirmação de despesa formatada em 4 linhas para um aplicativo de finanças.
+      A mensagem deve ser amigável, criativa e usar emojis.
+      Sua resposta DEVE SEGUIR ESTRITAMENTE o seguinte formato, sem adicionar textos extras, markdown ou qualquer outra formatação.
 
-      Contexto da Ação: ${action}
-      Detalhes da Despesa:
-      - Valor: R$ ${valor?.toFixed(2)}
+      Linha 1: ✅ Informação registrada!
+      Linha 2: [Sua mensagem criativa e contextual aqui]
+      Linha 3: [emoji da categoria] [categoria em mainúsculas]
+      Linha 4: 💰 [Valor formatado como R$XX,XX]
+      Linha 5: 📅 [Data da transação]
+
+      ---
+      EXEMPLO DE COMO FAZER:
+
+      # DADOS DE ENTRADA DO EXEMPLO:
+      - Ação: Despesa Criada
+      - Valor: 45.00
+      - Categoria: Alimentação
+      - Mensagem Original do Usuário: "iFood"
+      - Data: 21/09/2025
+
+      # RESPOSTA ESPERADA PARA O EXEMPLO:
+      ✅ Informação registrada!
+      🍔 Hummm, R$45 investidos pra matar aquela larica no iFood! 😋 Bom apetite! 🍕
+      🍔 ALIMENTAÇÃO
+      💰 R$45,00
+      📅 21/09/2025
+      ---
+
+      NÂO GERE NADA ALEM DAS 5 LINHAS ACIMA. 
+
+      AGORA, GERE A MENSAGEM PARA OS SEGUINTES DADOS REAIS:
+
+      # DADOS REAIS:
+      - Ação: ${action}
+      - Valor: ${valor?.toFixed(2)}
       - Categoria: ${categoria}
-
-      Seja criativo e evite mensagens genéricas. Por exemplo, se a categoria for "Lazer", 
-      mencione algo sobre aproveitar a vida. Se for "Alimentação", pode falar sobre "matar a fome".
-      A mensagem deve estar em português do Brasil.
+      - Mensagem Original do Usuário: "${originalMessage}"
+      - Data: ${currentDate}
     `;
 
     try {
-      return await this.geminiService.generateContent(prompt, false);
+      const response = await this.geminiService.generateContent(prompt, false);
+      return response.replace(/`/g, '');
     } catch (error) {
       console.error('Erro ao executar GenerateFriendlyMessageUseCase:', error);
-      // Retorna uma mensagem padrão em caso de erro para não quebrar o fluxo principal
-      return 'Operação realizada com sucesso!';
+      return `✅ Operação realizada!\n💰 R$${valor?.toFixed(2)}\n📅 ${currentDate}`;
     }
   }
 }

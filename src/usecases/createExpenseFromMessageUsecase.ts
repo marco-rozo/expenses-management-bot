@@ -80,7 +80,7 @@ class CreateExpenseFromMessageUsecase {
                     const geminiMessage = await this.generateFriendlyMessageUsecase.execute(GeminiActions.CREATE, expenseData);
                     return {
                         success: true,
-                        replyMessage: `Despesa criada com sucesso! ${geminiMessage}`,
+                        replyMessage: `${geminiMessage}`,
                     };
                 }
             }
