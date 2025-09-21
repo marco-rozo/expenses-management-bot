@@ -26,7 +26,8 @@ const categoryMap: { [key: string]: Category } = {
   'entretenimento': Category.LAZER,
   'cinema': Category.LAZER,
   'show': Category.LAZER,
-
+  'passeio': Category.LAZER,
+  
   'saúde': Category.SAUDE,
   'saude': Category.SAUDE,
   'farmácia': Category.SAUDE,
@@ -39,6 +40,9 @@ const categoryMap: { [key: string]: Category } = {
   'escola': Category.EDUCACAO,
   'faculdade': Category.EDUCACAO,
   'cursos': Category.EDUCACAO,
+  'pós': Category.EDUCACAO,
+  'pósgraduação': Category.EDUCACAO,
+  'pós graduação': Category.EDUCACAO,
 
   'outros': Category.OUTROS,
 };

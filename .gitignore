@@ -13,3 +13,5 @@
 
 .env
 expense-management-*.json
+.wwebjs_auth/
+.wwebjs_cache/
