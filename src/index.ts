@@ -7,6 +7,7 @@ import IdentifyExpenseByMessageUsecase from './usecases/identifyExpenseByMessage
 import CreateExpenseFromMessageUsecase from './usecases/createExpenseFromMessageUsecase';
 import ExpenseDatasource from './datasources/expenseDatasource';
 import ExpenseService from './services/expenseService';
+import GetTodayExpensesByUserIdUsecase from './usecases/getTodayExpensesByUserIdUsecase';
 
 
 const client = new Client({
@@ -20,6 +21,7 @@ const expenseService = new ExpenseService(expenseDatasourse);
 const generateFriendlyMessageUsecase = new GenerateFriendlyMessageUseCase(geminiService);
 const identifyExpenseByMessageUsecase = new IdentifyExpenseByMessageUsecase(geminiService);
 const createExpenseFromMessageUsecase = new CreateExpenseFromMessageUsecase(transcribeUsecase, generateFriendlyMessageUsecase, identifyExpenseByMessageUsecase, expenseService);
+const getTodayExpensesByUserIdUsecase = new GetTodayExpensesByUserIdUsecase(expenseService);
 
 
 console.log('Iniciando o cliente do WhatsApp...');
@@ -36,6 +38,9 @@ client.on('message', async (message) => {
   try {
     console.log(`Mensagem recebida de: ${message.from}`);
     const response = await createExpenseFromMessageUsecase.execute({ message })
+    // const response = await getTodayExpensesByUserIdUsecase.execute(message.from); 
+
+    // console.log('Resposta gerada:', response);
     message.reply(response.replyMessage);
   } catch (error) {
     console.error('Erro ao processar a mensagem:', error);

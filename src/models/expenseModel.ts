@@ -7,6 +7,9 @@ export enum Category {
   SAUDE = 'Saúde',
   EDUCACAO = 'Educação',
   OUTROS = 'Outros',
+  // Novas categorias
+  MERCADO = 'Mercado',
+  ASSINATURA = 'Assinatura',
 }
 
 export interface Expense {

@@ -27,6 +27,10 @@ class ExpenseService {
         return await this.expenseDatasource.getById(id);
     }
 
+    async getExpensesByUserIdAndDateRange(userId: string, startDate: Date, endDate: Date): Promise<Expense[]> {
+        return await this.expenseDatasource.getExpensesByUserIdAndDateRange(userId, startDate, endDate);
+    }
+
      async updateExpense(id: string, updates: Partial<Expense>): Promise<void> {
         const updatesWithTimestamp = {
             ...updates,

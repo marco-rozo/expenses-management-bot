@@ -43,6 +43,27 @@ class ExpenseDatasource {
         await deleteDoc(docRef);
     }
 
+    // const startOfDay = new Date();
+    // startOfDay.setHours(0, 0, 0, 0);
+
+    // const endOfDay = new Date();
+    // endOfDay.setHours(23, 59, 59, 999);
+    async getExpensesByUserIdAndDateRange(userId: string, startDate: Date, endDate: Date): Promise<Expense[]> {
+        const q = query(
+            this.expensesCollection,
+            where('userId', '==', userId),
+            where('createdAt', '>=', startDate.toISOString()),
+            where('createdAt', '<=', endDate.toISOString())
+        );
+
+        const snapshot = await getDocs(q);
+        
+        if (snapshot.empty) {
+            return [];
+        }
+        
+        return snapshot.docs.map(doc => doc.data() as Expense);
+    }
 }
 
 export default ExpenseDatasource;
