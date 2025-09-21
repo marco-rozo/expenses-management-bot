@@ -1,0 +1,4 @@
+export enum UserIntent {
+  CREATE_EXPENSE = 'CREATE_EXPENSE',
+  REQUEST_REPORT = 'REQUEST_REPORT',
+}

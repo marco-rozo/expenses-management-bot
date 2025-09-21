@@ -8,20 +8,30 @@ import CreateExpenseFromMessageUsecase from './usecases/createExpenseFromMessage
 import ExpenseDatasource from './datasources/expenseDatasource';
 import ExpenseService from './services/expenseService';
 import GetTodayExpensesByUserIdUsecase from './usecases/getTodayExpensesByUserIdUsecase';
+import IdentifyUserIntentUsecase from './usecases/identifyInputUserUsecase';
+import ProcedureUserMessageInputUsecase from './usecases/procedureUserMessageInputUsecase';
+import GenerateExpenseSummaryUsecase from './usecases/generateExpenseSummaryUsecase';
+import GetMonthlyExpensesByUserIdUsecase from './usecases/getMonthlyExpensesByUserIdUsecase';
 
 
 const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer: { headless: true, args: ['--no-sandbox'] },
 });
+
 const geminiService = new GeminiService();
 const transcribeUsecase = new TranscribeAudioUsecase();
 const expenseDatasourse = new ExpenseDatasource();
 const expenseService = new ExpenseService(expenseDatasourse);
 const generateFriendlyMessageUsecase = new GenerateFriendlyMessageUseCase(geminiService);
 const identifyExpenseByMessageUsecase = new IdentifyExpenseByMessageUsecase(geminiService);
-const createExpenseFromMessageUsecase = new CreateExpenseFromMessageUsecase(transcribeUsecase, generateFriendlyMessageUsecase, identifyExpenseByMessageUsecase, expenseService);
+const createExpenseFromMessageUsecase = new CreateExpenseFromMessageUsecase(generateFriendlyMessageUsecase, identifyExpenseByMessageUsecase, expenseService);
 const getTodayExpensesByUserIdUsecase = new GetTodayExpensesByUserIdUsecase(expenseService);
+const getMonthlyExpensesByUserIdUsecase = new GetMonthlyExpensesByUserIdUsecase(expenseService);
+const identifyUserIntentUsecase = new IdentifyUserIntentUsecase(geminiService);
+const generateExpenseSummaryUsecase = new GenerateExpenseSummaryUsecase(geminiService);
+const procedureUserMessageUsecase =
+  new ProcedureUserMessageInputUsecase(transcribeUsecase, identifyUserIntentUsecase, createExpenseFromMessageUsecase, generateExpenseSummaryUsecase, getMonthlyExpensesByUserIdUsecase, getTodayExpensesByUserIdUsecase);
 
 
 console.log('Iniciando o cliente do WhatsApp...');
@@ -37,11 +47,10 @@ client.on('ready', () => {
 client.on('message', async (message) => {
   try {
     console.log(`Mensagem recebida de: ${message.from}`);
-    const response = await createExpenseFromMessageUsecase.execute({ message })
-    // const response = await getTodayExpensesByUserIdUsecase.execute(message.from); 
-
-    // console.log('Resposta gerada:', response);
+    const response = await procedureUserMessageUsecase.execute({ message });
+    console.log('Resposta da intenção do usuário:', response);
     message.reply(response.replyMessage);
+
   } catch (error) {
     console.error('Erro ao processar a mensagem:', error);
   }

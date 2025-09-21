@@ -1,64 +1,21 @@
-import WAWebJS from "whatsapp-web.js";
-import { FormatMessage } from "../enums/formatMessage";
 import { GeminiActions } from "../enums/geminiActions";
 import { Category, Expense } from "../models/expenseModel";
 import { normalizeCategory } from "../utils/categoryNormalizer";
-import { isAudioFile } from "../utils/isAudioFile";
 import IdentifyExpenseByMessageUsecase from "./identifyExpenseByMessageUsecase";
 import GenerateFriendlyMessageUseCase from "./generateFriendlyMessageUseCase";
-import TranscribeAudioUsecase from "./transcribeAudioUsecase";
 import ExpenseService from "../services/expenseService";
-
-interface CreateExpenseOutput {
-    success: boolean;
-    replyMessage: string;
-}
-
-interface CreateExpenseInput {
-    message: WAWebJS.Message;
-}
-
+import { ResponseProcedureOutput } from "../interfaces/responseProcedureOutput";
+import { CreateExpenseInput } from "../interfaces/createExpenseInput";
 class CreateExpenseFromMessageUsecase {
     constructor(
-        private transcribeAudioUsecase: TranscribeAudioUsecase,
         private generateFriendlyMessageUsecase: GenerateFriendlyMessageUseCase,
         private identifyExpenseByMessageUsecase: IdentifyExpenseByMessageUsecase,
         private expenseService: ExpenseService,
-    ) {}
+    ) { }
 
-    async execute(input: CreateExpenseInput): Promise<CreateExpenseOutput> {
-        const { message } = input;
-
+    async execute(inputUser: CreateExpenseInput): Promise<ResponseProcedureOutput> {
+        const { processedText, format, message } = inputUser;
         try {
-            let processedText: string | null = null;
-            let format: FormatMessage = FormatMessage.TEXT;
-
-            if (message.hasMedia) {
-                const media = await message.downloadMedia();
-                if (isAudioFile(media.mimetype)) {
-                    const audioBase64 = media.data;
-                    processedText = await this.transcribeAudioUsecase.execute(audioBase64);
-                    format = FormatMessage.AUDIO;
-                } else {
-                    return {
-                        success: false,
-                        replyMessage: `Não identificamos o seu arquivo! Tente novamente com um áudio ou texto.`,
-                    };
-                }
-            } else {
-                processedText = message.body;
-                format = FormatMessage.TEXT;
-            }
-
-            if (!processedText) {
-                return {
-                    success: false,
-                    replyMessage: 'Não foi possível processar a mensagem (áudio vazio ou texto não identificado).',
-                };
-            }
-
-            console.log(`Mensagem processada: ${processedText}`);
-
             const response = await this.identifyExpenseByMessageUsecase.execute(processedText);
 
             if (typeof response === 'string') {
