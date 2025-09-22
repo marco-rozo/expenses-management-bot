@@ -1,0 +1,8 @@
+services:
+  app:
+    container_name: expenses-management-bot
+    env_file:
+      - .env
+    restart: unless-stopped
+    stdin_open: true
+    tty: true        

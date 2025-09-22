@@ -1,0 +1,17 @@
+# Dependências locais
+node_modules
+
+# Pasta de build
+dist
+
+# Arquivos de ambiente
+.env
+
+# Arquivos do Docker e Git
+Dockerfile
+docker-compose.yml
+.git
+.gitignore
+
+# Logs
+npm-debug.log*
