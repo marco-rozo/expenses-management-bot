@@ -36,7 +36,10 @@ const procedureUserMessageUsecase =
 
 console.log('Iniciando o cliente do WhatsApp...');
 client.on('qr', (qr) => {
-  console.log('QR Code recebido, escaneie com o seu celular.');
+  console.log('QR Code recebido! Copie o texto puro abaixo se o desenho falhar:');
+  console.log(qr); 
+
+  console.log('Tentando desenhar o QR Code no terminal:');
   qrcode.generate(qr, { small: true });
 });
 

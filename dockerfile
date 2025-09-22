@@ -1,37 +1,40 @@
-# 1. Imagem base
-FROM node:18-slim
+FROM node:20-slim AS builder
 
-# 2. Define o diretório de trabalho
 WORKDIR /usr/src/app
-
-# --- TAREFAS EXECUTADAS COMO ROOT ---
-
-# 3. Instala as dependências do sistema operacional
-RUN apt-get update \
-    && apt-get install -y \
-    libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 libdbus-1-3 \
-    libxkbcommon0 libgbm1 libasound2 libexpat1 libx11-6 libxfixes3 \
-    libxrandr2 libglib2.0-0 libcairo2 libpango-1.0-0 libpangocairo-1.0-0 \
-    libgdk-pixbuf2.0-0 fonts-liberation libxcomposite1 libxdamage1 libxtst6 \
-    && rm -rf /var/lib/apt/lists/*
-
-# 4. Copia os arquivos de dependência do projeto e instala
 COPY package*.json ./
-COPY puppeteer-patch.js ./
-
 RUN npm install
-
-# 5. Copia o restante do código da aplicação, incluindo o patch
 COPY . .
 RUN npm run build
+RUN npm prune --production
 
-# 6. Cria o usuário não-root e transfere a propriedade dos arquivos para ele
-RUN useradd -m appuser && chown -R appuser:appuser /usr/src/app
+FROM node:20-slim
 
-# --- FIM DAS TAREFAS DE ROOT ---
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
+    libnss3 \
+    libnspr4 \
+    libatk1.0-0 \
+    libatk-bridge2.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxkbcommon0 \
+    libxcomposite1 \
+    libxdamage1 \
+    libxfixes3 \
+    libxrandr2 \
+    libgbm1 \
+    libasound2 \
+    && rm -rf /var/lib/apt/lists/*
 
-# 7. Troca para o usuário não-root
-USER appuser
 
-# 8. Define o comando final para iniciar a aplicação
-CMD [ "node", "dist/index.js" ]
+WORKDIR /usr/src/app
+
+COPY --from=builder /usr/src/app/package*.json ./
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/dist ./dist
+
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
+
+
+# Comando para iniciar o bot
+CMD [ "npm", "start" ]
