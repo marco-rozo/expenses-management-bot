@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  app:
+    build: .
+    command: "npm run start"
+    working_dir: /usr/src/app
+    restart: always
+    environment:
+      - NODE_OPTIONS=--require ./puppeteer-patch.js
