@@ -36,5 +36,8 @@ COPY --from=builder /usr/src/app/dist ./dist
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 
-# Comando para iniciar o bot
-CMD [ "npm", "start" ]
+# Comando para copiar e rodar o script de inciialização
+COPY start.sh .
+RUN chmod +x ./start.sh
+
+CMD ["./start.sh"]

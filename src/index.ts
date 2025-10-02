@@ -16,7 +16,17 @@ import GetMonthlyExpensesByUserIdUsecase from './usecases/getMonthlyExpensesByUs
 
 const client = new Client({
   authStrategy: new LocalAuth(),
-  puppeteer: { headless: true, args: ['--no-sandbox'] },
+  puppeteer: { 
+    headless: true,
+    timeout: 60000, 
+    args: [
+      '--no-sandbox',
+       '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-gpu',
+      '--no-zygote'
+    ], 
+  },
 });
 
 const geminiService = new GeminiService();
@@ -37,7 +47,7 @@ const procedureUserMessageUsecase =
 console.log('Iniciando o cliente do WhatsApp...');
 client.on('qr', (qr) => {
   console.log('QR Code recebido! Copie o texto puro abaixo se o desenho falhar:');
-  console.log(qr); 
+  console.log(qr);
 
   console.log('Tentando desenhar o QR Code no terminal:');
   qrcode.generate(qr, { small: true });
