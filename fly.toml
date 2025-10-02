@@ -1,0 +1,29 @@
+# fly.toml app configuration file generated for expenses-management-bot on 2025-10-02T15:22:30-03:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'expenses-management-bot'
+primary_region = 'gru'
+
+[build]
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[mounts]
+  source="wwebjs_session_data"
+  destination="/usr/src/app/.wwebjs_auth"
+
+# A seção [http_service] foi removida e substituída por esta.
+# Esta configuração define a app como um "worker" que roda continuamente.
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080 # Porta interna para health checks, não será exposta
+  processes = ["app"]
+  
+  auto_stop_machines = false # Desliga o auto-stop
+  auto_start_machines = true
+  min_machines_running = 1   # Garante que 1 máquina esteja sempre ativa'
