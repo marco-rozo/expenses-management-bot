@@ -1,8 +1,14 @@
 services:
   app:
     container_name: expenses-management-bot
+    build:
+      context: . 
     env_file:
       - .env
     restart: unless-stopped
     stdin_open: true
-    tty: true        
+    tty: true
+    volumes:
+      - /home/marco-antonio/development/config/gcloud/expense-management-keys.json:/usr/src/app/google-credentials.json:ro
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/usr/src/app/google-credentials.json        
