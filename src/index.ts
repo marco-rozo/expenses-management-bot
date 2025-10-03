@@ -13,7 +13,6 @@ import ProcedureUserMessageInputUsecase from './usecases/procedureUserMessageInp
 import GenerateExpenseSummaryUsecase from './usecases/generateExpenseSummaryUsecase';
 import GetMonthlyExpensesByUserIdUsecase from './usecases/getMonthlyExpensesByUserIdUsecase';
 
-
 const client = new Client({
   authStrategy: new LocalAuth(),
   puppeteer: { 
